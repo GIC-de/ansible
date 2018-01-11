@@ -101,13 +101,13 @@ commands:
 '''
 
 import re
-from ansible.module_utils.nxos import get_config, load_config
-from ansible.module_utils.nxos import nxos_argument_spec, check_args
+from ansible.module_utils.network.nxos.nxos import get_config, load_config
+from ansible.module_utils.network.nxos.nxos import nxos_argument_spec, check_args
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.netcfg import CustomNetworkConfig
+from ansible.module_utils.network.common.config import CustomNetworkConfig
 
 BOOL_PARAMS = [
-    'assoc-vrf',
+    'assoc_vrf',
     'suppress_arp',
 ]
 PARAM_TO_COMMAND_KEYMAP = {
@@ -164,8 +164,7 @@ def get_existing(module, args):
         temp_config = netcfg.get_section(parents)
 
         if 'member vni {0} associate-vrf'.format(module.params['vni']) in temp_config:
-            parents.append('member vni {0} associate-vrf'.format(
-                module.params['vni']))
+            parents.append('member vni {0} associate-vrf'.format(module.params['vni']))
             config = netcfg.get_section(parents)
         elif "member vni {0}".format(module.params['vni']) in temp_config:
             parents.append('member vni {0}'.format(module.params['vni']))

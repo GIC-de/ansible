@@ -1,5 +1,7 @@
 ---
-- debug: msg="START TRANSPORT:{{ connection.transport }} nxos_ospf_vrf sanity test"
+- debug: msg="START connection={{ ansible_connection }} nxos_ospf_vrf sanity test"
+- debug: msg="Using provider={{ connection.transport }}"
+  when: ansible_connection == "local"
 
 - name: "Enable feature OSPF"
   nxos_feature:
@@ -20,6 +22,7 @@
       timer_throttle_lsa_hold: 1100
       timer_throttle_lsa_max: 3000
       vrf: test
+      passive_interface: true
       state: present
       provider: "{{ connection }}"
     register: result
@@ -61,4 +64,4 @@
 
   - assert: *false
 
-- debug: msg="END TRANSPORT:{{ connection.transport }} nxos_ospf_vrf sanity test"
+- debug: msg="END connection={{ ansible_connection }} nxos_ospf_vrf sanity test"

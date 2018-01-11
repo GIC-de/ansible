@@ -165,7 +165,7 @@ except ImportError:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.ec2 import (HAS_BOTO3, boto3_conn, camel_dict_to_snake_dict, ec2_argument_spec,
-                                      get_aws_connection_info, paging)
+                                      get_aws_connection_info)
 
 
 def list_launch_configs(connection, module):
@@ -177,8 +177,8 @@ def list_launch_configs(connection, module):
     sort_end = module.params.get('sort_end')
 
     try:
-        launch_configs = {'LaunchConfigurations': paging(pause=0, marker_property='NextToken', result_key='LaunchConfigurations')
-                                                        (connection.describe_launch_configurations)(LaunchConfigurationNames=launch_config_name)}
+        pg = connection.get_paginator('describe_launch_configurations')
+        launch_configs = pg.paginate(LaunchConfigurationNames=launch_config_name).build_full_result()
     except ClientError as e:
         module.fail_json(msg=e.message)
 
@@ -191,7 +191,7 @@ def list_launch_configs(connection, module):
             launch_config['CreatedTime'] = str(launch_config['CreatedTime'])
 
     if sort:
-        snaked_launch_configs.sort(key=lambda e: e[sort], reverse=(sort_order=='descending'))
+        snaked_launch_configs.sort(key=lambda e: e[sort], reverse=(sort_order == 'descending'))
 
     try:
         if sort and sort_start and sort_end:
@@ -210,13 +210,13 @@ def main():
     argument_spec = ec2_argument_spec()
     argument_spec.update(
         dict(
-            name = dict(required=False, default=[], type='list'),
-            sort = dict(required=False, default=None,
-                choices=['launch_configuration_name', 'image_id', 'created_time', 'instance_type', 'kernel_id', 'ramdisk_id', 'key_name']),
-            sort_order = dict(required=False, default='ascending',
-                choices=['ascending', 'descending']),
-            sort_start = dict(required=False),
-            sort_end = dict(required=False),
+            name=dict(required=False, default=[], type='list'),
+            sort=dict(required=False, default=None,
+                      choices=['launch_configuration_name', 'image_id', 'created_time', 'instance_type', 'kernel_id', 'ramdisk_id', 'key_name']),
+            sort_order=dict(required=False, default='ascending',
+                            choices=['ascending', 'descending']),
+            sort_start=dict(required=False),
+            sort_end=dict(required=False),
         )
     )
 

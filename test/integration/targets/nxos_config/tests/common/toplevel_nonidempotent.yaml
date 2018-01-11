@@ -1,9 +1,11 @@
 ---
-- debug: msg="START {{ connection.transport }}/nonidempotent.yaml"
+- debug: msg="START connection={{ ansible_connection }}/nonidempotent.yaml"
+- debug: msg="Using provider={{ connection.transport }}"
+  when: ansible_connection == "local"
 
 - name: setup
   nxos_config:
-    lines: hostname {{ inventory_hostname_short }}
+    lines: hostname switch
     provider: "{{ connection }}"
     match: none
 
@@ -32,8 +34,8 @@
 
 - name: teardown
   nxos_config:
-    lines: hostname {{ inventory_hostname_short }}
+    lines: hostname switch
     provider: "{{ connection }}"
     match: none
 
-- debug: msg="END {{ connection.transport }}/nonidempotent.yaml"
+- debug: msg="END connection={{ ansible_connection }}/nonidempotent.yaml"

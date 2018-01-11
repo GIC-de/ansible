@@ -1,5 +1,10 @@
 ---
-- debug: msg="START {{ connection.transport }}/defaults.yaml"
+- debug: msg="START connection={{ ansible_connection }}/defaults.yaml"
+- debug: msg="Using provider={{ connection.transport }}"
+  when: ansible_connection == "local"
+
+# Select interface for test
+- set_fact: intname="{{ nxos_int1 }}"
 
 - name: setup
   nxos_config:
@@ -7,13 +12,17 @@
       - no description
       - shutdown
     parents:
-      - interface Ethernet2/5
+      - "interface {{ intname }}"
     match: none
     provider: "{{ connection }}"
 
 - name: configure device with defaults included
   nxos_config:
-    src: defaults/config.j2
+    commands:
+      - description this is a test
+      - no shutdown
+    parents:
+      - "interface {{ intname }}"
     defaults: yes
     provider: "{{ connection }}"
   register: result
@@ -27,7 +36,11 @@
 
 - name: check device with defaults included
   nxos_config:
-    src: defaults/config.j2
+    commands:
+      - description this is a test
+      - no shutdown
+    parents:
+      - "interface {{ intname }}"
     defaults: yes
     provider: "{{ connection }}"
   register: result
@@ -39,4 +52,4 @@
       - "result.changed == false"
       - "result.updates is not defined"
 
-- debug: msg="END {{ connection.transport }}/defaults.yaml"
+- debug: msg="END connection={{ ansible_connection }}/defaults.yaml"

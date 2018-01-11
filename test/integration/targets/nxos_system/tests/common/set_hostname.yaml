@@ -1,5 +1,7 @@
 ---
-- debug: msg="START {{ connection.transport }}/set_hostname.yaml"
+- debug: msg="START connection={{ ansible_connection }}/set_hostname.yaml"
+- debug: msg="Using provider={{ connection.transport }}"
+  when: ansible_connection == "local"
 
 - name: setup
   nxos_config:
@@ -29,8 +31,8 @@
 
 - name: teardown
   nxos_config:
-    lines: "hostname {{ inventory_hostname }}"
+    lines: hostname switch
     match: none
     provider: "{{ connection }}"
 
-- debug: msg="END {{ connection.transport }}/set_hostname.yaml"
+- debug: msg="END connection={{ ansible_connection }}/set_hostname.yaml"

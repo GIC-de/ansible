@@ -51,6 +51,8 @@ class AnsibleError(Exception):
     '''
 
     def __init__(self, message="", obj=None, show_content=True, suppress_extended_error=False, orig_exc=None):
+        super(AnsibleError, self).__init__(message)
+
         # we import this here to prevent an import loop problem,
         # since the objects code also imports ansible.errors
         from ansible.parsing.yaml.objects import AnsibleBaseYAMLObject
@@ -67,8 +69,6 @@ class AnsibleError(Exception):
             self.message = '%s' % to_native(message)
         if orig_exc:
             self.orig_exc = orig_exc
-            self.message += '\nexception type: %s' % to_native(type(orig_exc))
-            self.message += '\nexception: %s' % to_native(orig_exc)
 
         self.tb = ''.join(traceback.format_tb(sys.exc_info()[2]))
 
@@ -172,6 +172,11 @@ class AnsibleError(Exception):
             error_message += '\n(specified line no longer in file, maybe it changed?)'
 
         return error_message
+
+
+class AnsibleAssertionError(AnsibleError, AssertionError):
+    '''Invalid assertion'''
+    pass
 
 
 class AnsibleOptionsError(AnsibleError):

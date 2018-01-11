@@ -48,13 +48,13 @@ options:
       - List of interfaces that should be associated to the VLAN.
   delay:
     description:
-      - Delay the play should wait to check for declaratie intent params values.
+      - Delay the play should wait to check for declarative intent params values.
     default: 10
   aggregate:
-    description: List of VLANs definitions
+    description: List of VLANs definitions.
   purge:
     description:
-      - Purge VLANs not defined in the aggregates parameter.
+      - Purge VLANs not defined in the I(aggregate) parameter.
     default: no
   state:
     description:
@@ -110,9 +110,9 @@ import time
 from copy import deepcopy
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.network_common import remove_default_spec
-from ansible.module_utils.eos import load_config, run_commands
-from ansible.module_utils.eos import eos_argument_spec, check_args
+from ansible.module_utils.network.common.utils import remove_default_spec
+from ansible.module_utils.network.eos.eos import load_config, run_commands
+from ansible.module_utils.network.eos.eos import eos_argument_spec, check_args
 
 
 def search_obj_in_list(vlan_id, lst):
@@ -140,7 +140,8 @@ def map_obj_to_commands(updates, module):
         elif state == 'present':
             if not obj_in_have:
                 commands.append('vlan %s' % w['vlan_id'])
-                commands.append('name %s' % w['name'])
+                if w['name']:
+                    commands.append('name %s' % w['name'])
 
                 if w['interfaces']:
                     for i in w['interfaces']:
@@ -172,13 +173,15 @@ def map_obj_to_commands(updates, module):
         else:
             if not obj_in_have:
                 commands.append('vlan %s' % w['vlan_id'])
-                commands.append('name %s' % w['name'])
+                if w['name']:
+                    commands.append('name %s' % w['name'])
                 commands.append('state %s' % w['state'])
-            elif obj_in_have['name'] != w['name'] or obj_in_have['state'] != w['state']:
+            elif (w['name'] and obj_in_have['name'] != w['name']) or obj_in_have['state'] != w['state']:
                 commands.append('vlan %s' % w['vlan_id'])
 
-                if obj_in_have['name'] != w['name']:
-                    commands.append('name %s' % w['name'])
+                if w['name']:
+                    if obj_in_have['name'] != w['name']:
+                        commands.append('name %s' % w['name'])
 
                 if obj_in_have['state'] != w['state']:
                     commands.append('state %s' % w['state'])

@@ -52,7 +52,7 @@ EXAMPLES = '''
         name: Testing
 
     - name: Get facts for all resource groups
-      azure_rm_securitygroup_facts:
+      azure_rm_resourcegroup_facts:
 
     - name: Get facts by tags
       azure_rm_resourcegroup_facts:
@@ -144,7 +144,7 @@ class AzureRMResourceGroupFacts(AzureRMModuleBase):
         try:
             response = self.rm_client.resource_groups.list()
         except CloudError as exc:
-            self.fail("Failed to list all items - {1}".format(str(exc)))
+            self.fail("Failed to list all items - {0}".format(str(exc)))
 
         results = []
         for item in response:
